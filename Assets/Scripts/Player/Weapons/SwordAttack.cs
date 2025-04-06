@@ -65,7 +65,17 @@ public class SwordAttack : MonoBehaviour
         if (enableAttack) 
         {
             pm.Lunge(basicAttackLunge[animationCount]);
-            Instantiate(hitBoxSpawnBasic[animationCount], transform);
+            GameObject temp = Instantiate(hitBoxSpawnBasic[animationCount],new Vector2(transform.position.x + facing,transform.position.y),Quaternion.identity,transform);
+            if (facing == 1)
+            {
+                temp.transform.localScale *= new Vector2(facing, facing);
+            }
+            if (facing == -1)
+            {
+                temp.transform.localScale *= new Vector2(facing, -facing);
+            }
+
+            Destroy(temp,0.25f);
             StartCoroutine(WaitAnimation(basicAnimationTime[animationCount]));
         }      
     }
