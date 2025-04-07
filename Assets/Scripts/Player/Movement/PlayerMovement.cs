@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using Unity.IO.LowLevel.Unsafe;
 using UnityEditor.Rendering;
 using UnityEngine;
@@ -7,28 +8,32 @@ using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
+    [Header("Player General Movement Variables")]
     public Rigidbody2D rb;
-    public float moveSpeed;
-    public float jumpForce;
+    public float moveSpeed;    
+    public int facingHorizontal;
+    public Vector2 _moveDirection;
+
+    [Header("Player Dash Variables")]
     public float dashForceX;
     public float dashVelocityX;
     public float dashFallOffDuration;
-    private Vector2 _moveDirection;
+    public float residueSpeedX;
+    public float residueSpeedY;
+    public float dashDuration = 0.25f;
+    public float dashTime = 0;
+    public float dashFalloff;
+
+    [Header("Player Condition Variables")]
     public bool isGrounded;
     public bool isDashing;
-
-    public int facing;
-
+    public bool isLunging;
     bool enableDoubleJump = true;
+
+    [Header("Player Jump Variables")]
     int jumpCount = 0;
     int maxJump = 2;
-
-    float residueSpeedX;
-    float residueSpeedY;
-
-    float dashDuration = 0.25f;
-    float dashTime = 0;
-    float dashFalloff;
+    public float jumpForce;
 
     public InputActionReference move;
     public InputActionReference jump;
@@ -39,11 +44,11 @@ public class PlayerMovement : MonoBehaviour
         _moveDirection = move.action.ReadValue<Vector2>();
         if (Input.GetKeyDown(KeyCode.A))
         {
-            facing = -1;
+            facingHorizontal = -1;
         }
         if (Input.GetKeyDown(KeyCode.D))
         {
-            facing = 1;
+            facingHorizontal = 1;
         }
     }
 
@@ -61,6 +66,10 @@ public class PlayerMovement : MonoBehaviour
             {
                 dashForceX = 15;
                 isDashing = false;
+                if (isLunging)
+                {
+                    isLunging = false;
+                }
                 residueSpeedX = dashVelocityX;
             }
         }
@@ -108,19 +117,22 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!isDashing)
         {
-            dashVelocityX = _moveDirection.x + facing * dashForceX;
+            dashVelocityX = _moveDirection.x + facingHorizontal * dashForceX;
             dashTime = 0;
             isDashing = true;
+            dashFallOffDuration = 2;
             dashFalloff = 10;
-            dashDuration = 2f;
+            dashDuration = 0.25f;
         }
     }
 
     public void Lunge(float modifier)
     {
-        dashVelocityX = _moveDirection.x + facing * modifier;
+        dashVelocityX = _moveDirection.x + facingHorizontal * modifier;
         dashTime = 0;
         isDashing = true;
+        isLunging = true;
+        dashFallOffDuration = 0.25f;
         dashFalloff = 0.0005f;
         dashDuration = 0.0005f;
     }
@@ -141,9 +153,24 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-
-    public void AddVelocity()
+    public bool ReturnIsDashing()
     {
+        return isDashing;
+    }
 
+    public bool ReturnIsLunging()
+    {
+        return isLunging;
+    }
+
+    public bool ReturnIsGrounded()
+    {
+        return isGrounded;
+    }
+
+    public void Jump(float jump)
+    {
+        rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y + jump);
+        isGrounded = false;
     }
 }
