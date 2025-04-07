@@ -43,6 +43,7 @@ public class SwordAttack : MonoBehaviour
 
     void Start()
     {
+        //attatches other components
         pm = GetComponent<PlayerMovement>();
         rb = GetComponent<Rigidbody2D>();
         facingHorizontal = 1;
@@ -71,6 +72,7 @@ public class SwordAttack : MonoBehaviour
         {
             facingVertical = 1;
         }
+        //calls if player is grounded from player movment script
         if (animationCount == animationCountMax && pm.ReturnIsGrounded())
         {
             animationCount = 0;
@@ -111,6 +113,8 @@ public class SwordAttack : MonoBehaviour
             AerialAttack();
         }
     }
+
+    //coroutine, plays like an aditional seperate update function, runs independant from update
     IEnumerator WaitAnimation(float time,bool enableAnimation)
     {
         enableAttack = false;
@@ -131,9 +135,10 @@ public class SwordAttack : MonoBehaviour
 
     public void BasicAttack()
     {
+        //calls function in player movment to lunge
         pm.Lunge(basicAttackLungeDist[animationCount]);
         GameObject temp = Instantiate(hitBoxBasic[animationCount], new Vector2(transform.position.x + facingHorizontal, transform.position.y), Quaternion.identity, transform);
-        if (facingHorizontal == 1)
+        if (facingHorizontal == 1) //changes direction of hitbox depending on where the player is facing by mirroring it using scale
         {
             temp.transform.localScale *= new Vector2(facingHorizontal, facingHorizontal);
         }
@@ -148,7 +153,7 @@ public class SwordAttack : MonoBehaviour
 
     public void AerialAttack()
     {
-        //in air facing left or right + no vertical
+        //in air facing left or right + no vertical, listens for key presses
         if ((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)) && !Input.GetKey(KeyCode.S) && !Input.GetKey(KeyCode.W))
         {
             GameObject temp = Instantiate(hitBoxBasicAerialHorizontal,new Vector2(transform.position.x + facingHorizontal, transform.position.y),Quaternion.identity,transform);
@@ -160,6 +165,7 @@ public class SwordAttack : MonoBehaviour
             {
                 temp.transform.localScale *= new Vector2(facingHorizontal, -facingHorizontal);
             }
+            //detroys object x time after calling this
             Destroy(temp,aerialDestroyTime);
             StartCoroutine(WaitAnimation(basicAerialAnimationTimeHorizontal,false));
         }
