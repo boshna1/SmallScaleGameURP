@@ -28,6 +28,7 @@ public class SwordAttack : MonoBehaviour
     [SerializeField] GameObject hitBoxBasicAerialVertical;
     public float aerialDestroyTime;
     public float hopModifier;
+    public float airBufferTime;
 
     [Header("Player Facing")]
     //determines player directoin
@@ -48,7 +49,7 @@ public class SwordAttack : MonoBehaviour
         facingVertical = 1;
         enableAttack = true;
         enableBasicAttack = true;
-        enableBasicAerial = true;
+        enableBasicAerial = false;
     }
 
 
@@ -80,6 +81,7 @@ public class SwordAttack : MonoBehaviour
         }
         if (pm.ReturnIsGrounded())
         {
+            enableBasicAerial = false;
             enableBasicAttack = true;
         }
 
@@ -104,7 +106,7 @@ public class SwordAttack : MonoBehaviour
         {
             BasicAttack();
         }
-        else if (enableAttack && !pm.ReturnIsGrounded())
+        else if (enableAttack && !pm.ReturnIsGrounded() && enableBasicAerial)
         {
             AerialAttack();
         }
@@ -121,6 +123,12 @@ public class SwordAttack : MonoBehaviour
             animationCount++;
         }           
     }
+    IEnumerator BufferAerial(float time)
+    {
+        yield return new WaitForSeconds(time);
+        enableBasicAerial = true;
+    }
+
     public void BasicAttack()
     {
         pm.Lunge(basicAttackLungeDist[animationCount]);
@@ -185,10 +193,14 @@ public class SwordAttack : MonoBehaviour
             if (facingVertical == -1)
             {
                 pm.Jump(hopModifier);
-            }
-            
+            }            
             StartCoroutine(WaitAnimation(basicAerialAnimationTimeVertical,false));
             Destroy(temp, aerialDestroyTime);
         }
+    }
+
+    public void BufferAerial()
+    {
+        StartCoroutine(BufferAerial(airBufferTime));
     }
 }

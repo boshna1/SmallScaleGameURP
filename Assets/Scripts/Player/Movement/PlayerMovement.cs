@@ -39,6 +39,13 @@ public class PlayerMovement : MonoBehaviour
     public InputActionReference jump;
     public InputActionReference dash;
 
+    SwordAttack SA;
+
+    private void Start()
+    {
+        SA = GetComponent<SwordAttack>();
+    }
+
     private void Update()
     {
         _moveDirection = move.action.ReadValue<Vector2>();
@@ -110,6 +117,7 @@ public class PlayerMovement : MonoBehaviour
             jumpCount++;
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
             isGrounded = false;
+            SA.BufferAerial();
         }
     }
 
