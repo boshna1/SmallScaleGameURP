@@ -39,11 +39,20 @@ public class PlayerMovement : MonoBehaviour
     public InputActionReference jump;
     public InputActionReference dash;
 
-    SwordAttack SA;
+    SwordAttack swordAttack;
+    SpearAttack spearAttack;
 
     private void Start()
     {
-        SA = GetComponent<SwordAttack>();
+        if (name == "PlayerSword")
+        {
+            swordAttack = GetComponent<SwordAttack>();
+        }
+        if (name == "PlayerSpear")
+        {
+            spearAttack = GetComponent < SpearAttack>();
+        }
+        
     }
 
     private void Update()
@@ -117,7 +126,15 @@ public class PlayerMovement : MonoBehaviour
             jumpCount++;
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
             isGrounded = false;
-            SA.BufferAerial();
+            if (name == "PlayerSword")
+            {
+                swordAttack.BufferAerial();
+            }
+            if (name == "PlayerSpear")
+            {
+                spearAttack.BufferAerial();
+            }
+
         }
     }
 

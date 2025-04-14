@@ -31,6 +31,7 @@ public class SpearAttack : MonoBehaviour
     public float aerialDestroyTime;
     public float hopModifier;
     public float airBufferTime;
+    [SerializeField] GameObject spearProjectile;
 
     [Header("Player Facing")]
     //determines player directoin
@@ -137,9 +138,9 @@ public class SpearAttack : MonoBehaviour
 
     IEnumerator CheckSpamTime()
     {
-        yield return new WaitForSeconds(0.9f);
+        yield return new WaitForSeconds(0.4f);
         Debug.Log(spamTime - Time.time);
-        if (spamTime - Time.time < -0.8f && isSpearSpam)
+        if (spamTime - Time.time < -0.4f && isSpearSpam)
         {
             isSpearSpam = false;
             animationCount = 0;
@@ -227,14 +228,14 @@ public class SpearAttack : MonoBehaviour
         //in air up or down + movment
         else if (((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)) || ((!Input.GetKey(KeyCode.A) || !Input.GetKey(KeyCode.D))) && (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S))))
         {
-            GameObject temp = Instantiate(hitBoxBasicAerialVertical, new Vector2(transform.position.x, transform.position.y + facingVertical), Quaternion.identity, transform);
-            if (facingHorizontal == 1)
+            GameObject temp = Instantiate(spearProjectile, new Vector2(transform.position.x, transform.position.y + facingVertical), Quaternion.identity, transform);
+            if (facingVertical == 1)
             {
-                temp.transform.localScale *= new Vector2(facingHorizontal, facingHorizontal);
+                temp.transform.rotation = Quaternion.Euler(0, 0, 90);
             }
-            if (facingHorizontal == -1)
+            if (facingVertical == -1)
             {
-                temp.transform.localScale *= new Vector2(facingHorizontal, -facingHorizontal);
+                temp.transform.rotation = Quaternion.Euler(0, 0, -90);
             }
             if (facingVertical == -1)
             {
