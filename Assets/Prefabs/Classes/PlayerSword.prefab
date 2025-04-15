@@ -265,7 +265,7 @@ MonoBehaviour:
   - {x: -0.2070514, y: -0.96700037, z: 0}
   m_ShapePathHash: -1629923972
   m_Mesh: {fileID: 0}
-  m_InstanceId: 29106
+  m_InstanceId: 30654
   m_LocalBounds:
     m_Center: {x: -0.0063450933, y: -0.007835627, z: 0}
     m_Extent: {x: 0.51338553, y: 1.0098693, z: 0}
@@ -427,6 +427,7 @@ MonoBehaviour:
   hitBoxBasicAerialHorizontal: {fileID: 2059213211060390623, guid: 9122875bb850a5a4bb9a4839b2f3f031, type: 3}
   hitBoxBasicAerialVertical: {fileID: 2059213211060390623, guid: 9122875bb850a5a4bb9a4839b2f3f031, type: 3}
   aerialDestroyTime: 0.25
-  hopModifier: 5
+  hopModifierX: 5
+  hopModifierY: 5
   airBufferTime: 0.15
   attack: {fileID: -8860631252888860425, guid: d8ae89a752b14284ba55d25ce36f7f10, type: 3}

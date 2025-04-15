@@ -27,7 +27,8 @@ public class SwordAttack : MonoBehaviour
     [SerializeField] GameObject hitBoxBasicAerialHorizontal;
     [SerializeField] GameObject hitBoxBasicAerialVertical;
     public float aerialDestroyTime;
-    public float hopModifier;
+    public float hopModifierX;
+    public float hopModifierY;
     public float airBufferTime;
 
     [Header("Player Facing")]
@@ -198,7 +199,7 @@ public class SwordAttack : MonoBehaviour
             }
             if (facingVertical == -1)
             {
-                pm.Jump(hopModifier);
+                pm.Hop(hopModifierY);
             }            
             StartCoroutine(WaitAnimation(basicAerialAnimationTimeVertical,false));
             Destroy(temp, aerialDestroyTime);

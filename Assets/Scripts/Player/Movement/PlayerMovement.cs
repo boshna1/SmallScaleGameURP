@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using Unity.IO.LowLevel.Unsafe;
 using UnityEditor.Rendering;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
@@ -13,6 +14,7 @@ public class PlayerMovement : MonoBehaviour
     public float moveSpeed;    
     public int facingHorizontal;
     public Vector2 _moveDirection;
+    
 
     [Header("Player Dash Variables")]
     public float dashForceX;
@@ -20,8 +22,8 @@ public class PlayerMovement : MonoBehaviour
     public float dashFallOffDuration;
     public float residueSpeedX;
     public float residueSpeedY;
-    public float dashDuration = 0.25f;
-    public float dashTime = 0;
+    public float dashDuration;
+    public float dashTime;
     public float dashFalloff;
 
     [Header("Player Condition Variables")]
@@ -29,6 +31,16 @@ public class PlayerMovement : MonoBehaviour
     public bool isDashing;
     public bool isLunging;
     bool enableDoubleJump = true;
+
+    [Header("Player Knockback Variables")]
+    public bool isKnockback;
+    public Vector2 knockbackVelocity;
+    public float knockbackX;
+    public float knockbackTime;
+    public float knockbackFalloff;
+    public float knockbackFallOffDuration;
+    public float knockbackDuration;
+    public bool localKnockback;
 
     [Header("Player Jump Variables")]
     int jumpCount = 0;
@@ -44,6 +56,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Start()
     {
+        isKnockback = false;    
         if (name == "PlayerSword")
         {
             swordAttack = GetComponent<SwordAttack>();
@@ -70,32 +83,21 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (isDashing)  
+        if (isDashing)
         {
-            dashTime += Time.fixedDeltaTime;
-            rb.velocity = new Vector2(dashVelocityX, rb.velocity.y);
-            if (dashForceX > dashFalloff)
-            {
-                dashVelocityX = Mathf.Lerp(dashVelocityX, 0, dashTime / dashFallOffDuration);                
-            }
-            if (dashTime >= dashDuration) 
-            {
-                dashForceX = 15;
-                isDashing = false;
-                if (isLunging)
-                {
-                    isLunging = false;
-                }
-                residueSpeedX = dashVelocityX;
-            }
+            DashingFunction();
+        }
+        else if (isKnockback)
+        {
+            KnockBackFunction();
         }
         else if (residueSpeedX != 0)
         {
-            residueSpeedX = Mathf.MoveTowards(residueSpeedX,0,1);
-            rb.velocity = new Vector2(residueSpeedX,0) + new Vector2(_moveDirection.x * moveSpeed, rb.velocity.y);
+            residueSpeedX = Mathf.MoveTowards(residueSpeedX, 0, 1);
+            rb.velocity = new Vector2(residueSpeedX, 0) + new Vector2(_moveDirection.x * moveSpeed, rb.velocity.y);
         }
         else
-        {
+        {    
             rb.velocity = new Vector2(_moveDirection.x * moveSpeed, rb.velocity.y);
         }
     }
@@ -193,9 +195,70 @@ public class PlayerMovement : MonoBehaviour
         return isGrounded;
     }
 
-    public void Jump(float jump)
+    public void Hop(float y)
     {
-        rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y + jump);
+        rb.velocity = Vector2.zero;
+        rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y + y);
         isGrounded = false;
     }
+
+    public Vector2 ReturnMoveDir()
+    {
+        return _moveDirection;
+    }
+
+    public void DashingFunction()
+    {
+        dashTime += Time.fixedDeltaTime;
+        rb.velocity = new Vector2(dashVelocityX, rb.velocity.y);
+        if (dashForceX > dashFalloff)
+        {
+            dashVelocityX = Mathf.Lerp(dashVelocityX, 0, dashTime / dashFallOffDuration);
+        }
+        if (dashTime >= dashDuration)
+        {
+            dashForceX = 15;
+            isDashing = false;
+            if (isLunging)
+            {
+                isLunging = false;
+            }
+            residueSpeedX = dashVelocityX;
+        }
+
+    }
+    public void KnockBackFunction()
+    {
+        knockbackTime += Time.fixedDeltaTime;
+        rb.velocity = new Vector2(knockbackVelocity.x, rb.velocity.y);
+        if (knockbackX > knockbackFalloff)
+        {
+            knockbackVelocity.x = Mathf.Lerp(knockbackVelocity.x, 0, knockbackTime / knockbackFallOffDuration);
+        }
+        if (knockbackTime >= knockbackDuration)
+        {
+            knockbackX = 0;
+            isKnockback = false;
+        }
+        residueSpeedX = knockbackVelocity.x;
+    }
+
+    public void EnableKnockBack(Vector2 knockbackVelocity, float knockbackX, float knockbackFalloff, float knockbackFallOffDuration, float knockbackDuration)
+    {
+        knockbackTime = 0;
+        localKnockback = false;
+        isKnockback = true;
+        this.knockbackVelocity = knockbackVelocity;
+        this.knockbackX = knockbackX;
+        this.knockbackFalloff = knockbackFalloff;
+        this.knockbackFallOffDuration = knockbackFallOffDuration;
+        this.knockbackDuration = knockbackDuration;
+    }
 }
+
+
+
+    
+
+
+
