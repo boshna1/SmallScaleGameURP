@@ -198,7 +198,7 @@ public class HammerAttack : MonoBehaviour
             }
             if (facingVertical == -1)
             {
-                pm.Jump(hopModifier);
+                pm.Hop(hopModifier);
             }
             StartCoroutine(WaitAnimation(basicAerialAnimationTimeVertical, false));
             Destroy(temp, aerialDestroyTime);
