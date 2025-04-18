@@ -153,6 +153,8 @@ GameObject:
   - component: {fileID: 3399535403637382169}
   - component: {fileID: 6966378035356568948}
   - component: {fileID: 3131889636054810404}
+  - component: {fileID: 1108382686153603543}
+  - component: {fileID: -6681710509031129410}
   m_Layer: 0
   m_Name: PlayerSword
   m_TagString: Player
@@ -326,6 +328,14 @@ MonoBehaviour:
   isGrounded: 1
   isDashing: 0
   isLunging: 0
+  isKnockback: 0
+  knockbackVelocity: {x: 0, y: 0}
+  knockbackX: 0
+  knockbackTime: 0
+  knockbackFalloff: 0
+  knockbackFallOffDuration: 0
+  knockbackDuration: 0
+  localKnockback: 0
   jumpForce: 15
   move: {fileID: -5591170235746162779, guid: d8ae89a752b14284ba55d25ce36f7f10, type: 3}
   jump: {fileID: -8467031372788354835, guid: d8ae89a752b14284ba55d25ce36f7f10, type: 3}
@@ -431,3 +441,31 @@ MonoBehaviour:
   hopModifierY: 5
   airBufferTime: 0.15
   attack: {fileID: -8860631252888860425, guid: d8ae89a752b14284ba55d25ce36f7f10, type: 3}
+--- !u!114 &1108382686153603543
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8947831091318693213}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c29226c461e177e4dbb33d8cc47df64d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentHP: 0
+  maxHP: 0
+--- !u!114 &-6681710509031129410
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8947831091318693213}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 909bf43960f0b22458543c266321cdaa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerXP: 0
+  XPtoLevelUp: 0

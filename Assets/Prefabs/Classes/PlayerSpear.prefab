@@ -153,6 +153,8 @@ GameObject:
   - component: {fileID: 4848071508150406189}
   - component: {fileID: 618241788611250162}
   - component: {fileID: 7978671836406044701}
+  - component: {fileID: -796743043524685182}
+  - component: {fileID: -4940217382474110239}
   m_Layer: 0
   m_Name: PlayerSpear
   m_TagString: Player
@@ -445,3 +447,31 @@ MonoBehaviour:
   airBufferTime: 0.25
   spearProjectile: {fileID: 2059213211060390623, guid: 2192a951317180b40a3b1f2693008365, type: 3}
   attack: {fileID: -8860631252888860425, guid: d8ae89a752b14284ba55d25ce36f7f10, type: 3}
+--- !u!114 &-796743043524685182
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8551279859697895512}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c29226c461e177e4dbb33d8cc47df64d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentHP: 0
+  maxHP: 0
+--- !u!114 &-4940217382474110239
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8551279859697895512}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 909bf43960f0b22458543c266321cdaa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerXP: 0
+  XPtoLevelUp: 0
