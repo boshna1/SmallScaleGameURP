@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 4290092549474828567}
   - component: {fileID: 8455283853395668960}
   - component: {fileID: -3337752948939619509}
+  - component: {fileID: 1933635319303878478}
   m_Layer: 0
   m_Name: PlayerHammer
   m_TagString: Player
@@ -331,6 +332,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerXP: 0
   XPtoLevelUp: 0
+--- !u!114 &1933635319303878478
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 392355135731835245}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6b39c44c721764a9334bc3d6ec6a1b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Damage: 0
 --- !u!1 &4716087457657957951
 GameObject:
   m_ObjectHideFlags: 0

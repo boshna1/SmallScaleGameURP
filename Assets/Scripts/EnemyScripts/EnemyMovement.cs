@@ -11,10 +11,13 @@ public class EnemyMovement : MonoBehaviour
     private Rigidbody2D rb;
     private Animator anima;
     private Transform CurrentPoint;
+    private float damage;
 
     [Header("Enemy Variables")]
     //
     public float speed;
+    public float HP;
+    public float resistance;
 
     [Header("Path Variables")]
     public float Distancefrompoint;
@@ -22,9 +25,12 @@ public class EnemyMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+
         rb = GetComponent<Rigidbody2D>();
         anima = GetComponent<Animator>();
         CurrentPoint = pointR.transform;
+        damage = GameObject.FindWithTag("Player").GetComponent<WeaponStats>().returnDamage();
+        damage = damage - (damage * (resistance / 100));
     }
 
     // Update is called once per frame
@@ -49,6 +55,11 @@ public class EnemyMovement : MonoBehaviour
             CurrentPoint = pointR.transform;
             flip();
         }
+        if (HP <= 0)
+        {
+            Destroy(gameObject);
+        }
+    
     }
     private void flip()
     {
@@ -66,7 +77,7 @@ public class EnemyMovement : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            SceneManager.LoadSceneAsync(0);
+            HP = HP - damage;
         }
     }
 }
