@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 
 public class SwordAttack : MonoBehaviour
 {
+    
     [Header("Player General Combo Variables")]
     //determines if player should do a combo
     public int animationCount = 0;
