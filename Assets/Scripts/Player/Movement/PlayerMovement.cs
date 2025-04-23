@@ -53,6 +53,9 @@ public class PlayerMovement : MonoBehaviour
 
     SwordAttack swordAttack;
     SpearAttack spearAttack;
+    HammerAttack hammerAttack;
+    BowAttack bowAttack;
+
 
     private void Start()
     {
@@ -65,7 +68,15 @@ public class PlayerMovement : MonoBehaviour
         {
             spearAttack = GetComponent < SpearAttack>();
         }
-        
+        if (name == "PlayerHammer")
+        {
+            hammerAttack = GetComponent<HammerAttack>();
+        }
+        if (name == "PlayerBow")
+        {
+            bowAttack = GetComponent<BowAttack>();
+        }
+
     }
 
     private void Update()
@@ -93,6 +104,7 @@ public class PlayerMovement : MonoBehaviour
         }
         else if (residueSpeedX != 0)
         {
+            PassEnableDash(false);
             residueSpeedX = Mathf.MoveTowards(residueSpeedX, 0, 1);
             rb.velocity = new Vector2(residueSpeedX, 0) + new Vector2(_moveDirection.x * moveSpeed, rb.velocity.y);
         }
@@ -144,6 +156,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!isDashing)
         {
+            PassEnableDash(true);
             dashVelocityX = _moveDirection.x + facingHorizontal * dashForceX;
             dashTime = 0;
             isDashing = true;
@@ -253,6 +266,26 @@ public class PlayerMovement : MonoBehaviour
         this.knockbackFalloff = knockbackFalloff;
         this.knockbackFallOffDuration = knockbackFallOffDuration;
         this.knockbackDuration = knockbackDuration;
+    }
+
+    public void PassEnableDash(bool condition)
+    {
+        if (name == "PlayerSword")
+        {
+            swordAttack.EnableDashAttack(condition);
+        }
+        if (name == "PlayerSpear")
+        {
+            spearAttack.EnableDashAttack(condition);
+        }
+        if (name == "PlayerHammer")
+        {
+            hammerAttack.EnableDashAttack(condition);
+        }
+        if (name == "PlayerBow")
+        {
+            bowAttack.EnableDashAttack(condition);
+        }
     }
 }
 

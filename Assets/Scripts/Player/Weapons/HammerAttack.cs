@@ -18,6 +18,7 @@ public class HammerAttack : MonoBehaviour
     public bool enableBasicAttack;
     [SerializeField] GameObject[] hitBoxBasic = new GameObject[3];
     public float basicDestroyTime;
+    public float[] lungeDelay = new float[3];
 
     [Header("Player Aerial Combo Variables")]
     //aerial
@@ -29,6 +30,12 @@ public class HammerAttack : MonoBehaviour
     public float aerialDestroyTime;
     public float hopModifier;
     public float airBufferTime;
+
+    [Header("Player Dash Combo Variables")]
+    public bool enableDashAttack;
+    public float dashDistance;
+    [SerializeField] GameObject[] hitBoxDashAttack = new GameObject[1];
+    public float dashAttackTime;
 
     [Header("Player Facing")]
     //determines player directoin
@@ -112,6 +119,10 @@ public class HammerAttack : MonoBehaviour
         {
             AerialAttack();
         }
+        else if (enableDashAttack && pm.ReturnIsGrounded() && pm.ReturnIsDashing())
+        {
+            DashAttack();
+        }
     }
 
     //coroutine, plays like an aditional seperate update function, runs independant from update
@@ -127,6 +138,15 @@ public class HammerAttack : MonoBehaviour
             animationCount++;
         }
     }
+    IEnumerator WaitAnimationDash(float time)
+    {
+        enableAttack = false;
+        enableBasicAttack = false;
+        yield return new WaitForSeconds(time);
+        enableBasicAttack = true;
+        enableAttack = true;
+        
+    }
     IEnumerator BufferAerial(float time)
     {
         yield return new WaitForSeconds(time);
@@ -136,7 +156,7 @@ public class HammerAttack : MonoBehaviour
     public void BasicAttack()
     {
         //calls function in player movment to lunge
-        pm.Lunge(basicAttackLungeDist[animationCount]);
+        Invoke("LungeDelay", lungeDelay[animationCount]);
         GameObject temp = Instantiate(hitBoxBasic[animationCount], new Vector2(transform.position.x + facingHorizontal, transform.position.y), Quaternion.identity, transform);
         if (facingHorizontal == 1) //changes direction of hitbox depending on where the player is facing by mirroring it using scale
         {
@@ -205,8 +225,34 @@ public class HammerAttack : MonoBehaviour
         }
     }
 
+    public void DashAttack()
+    {
+        //calls function in player movment to lunge
+        GameObject temp = Instantiate(hitBoxDashAttack[0], new Vector2(transform.position.x + facingHorizontal, transform.position.y), Quaternion.identity, transform);
+        if (facingHorizontal == 1) //changes direction of hitbox depending on where the player is facing by mirroring it using scale
+        {
+            temp.transform.localScale *= new Vector2(facingHorizontal, facingHorizontal);
+        }
+        if (facingHorizontal == -1)
+        {
+            temp.transform.localScale *= new Vector2(facingHorizontal, -facingHorizontal);
+        }
+        Destroy(temp, basicDestroyTime);
+        StartCoroutine(WaitAnimationDash(dashAttackTime));
+    }
+
     public void BufferAerial()
     {
         StartCoroutine(BufferAerial(airBufferTime));
+    }
+
+    public void LungeDelay()
+    {
+        pm.Lunge(basicAttackLungeDist[animationCount]);
+    }
+
+    public void EnableDashAttack(bool condition)
+    {
+        enableDashAttack = condition;
     }
 }

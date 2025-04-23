@@ -31,6 +31,11 @@ public class SwordAttack : MonoBehaviour
     public float hopModifierY;
     public float airBufferTime;
 
+    [Header("Player Dash Combo Variables")]
+    public bool enableDashAttack;
+    public float dashDistance;
+    [SerializeField] GameObject[] hitBoxDashAttack = new GameObject[1];
+
     [Header("Player Facing")]
     //determines player directoin
     int facingHorizontal = 0;
@@ -209,5 +214,10 @@ public class SwordAttack : MonoBehaviour
     public void BufferAerial()
     {
         StartCoroutine(BufferAerial(airBufferTime));
+    }
+
+    public void EnableDashAttack(bool condition)
+    {
+        enableDashAttack = condition;
     }
 }
