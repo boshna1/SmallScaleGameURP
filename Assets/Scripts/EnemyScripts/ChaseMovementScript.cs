@@ -17,10 +17,7 @@ public class ChaseMovementScript : MonoBehaviour
     public float DistanceToEngage;
     public float speed1;
     public float Distancefrompoint;
-    [Header("Enemy HP")]
-    public float HP;
-    //Percentage (0-100%)
-    public float resistance;
+
 
     private float distance;
     private float distance2;
@@ -31,8 +28,6 @@ public class ChaseMovementScript : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         CurrentPoint = pointR.transform;
         player = GameObject.FindWithTag("Player").GetComponent<Transform> ();
-        damage = GameObject.FindWithTag("Player").GetComponent<WeaponStats>().returnDamage();
-        damage = damage - (damage * (resistance/100));
         Chase = 0;
     }
 
@@ -82,10 +77,7 @@ public class ChaseMovementScript : MonoBehaviour
             transform.position = Vector2.MoveTowards(this.transform.position, player.transform.position, speed2 * Time.deltaTime);
             transform.rotation = Quaternion.Euler(Vector3.forward * angle);
         }
-        if (damage <= 0)
-        {
-            Destroy(gameObject);
-        }
+
 
     }
 
@@ -101,12 +93,5 @@ public class ChaseMovementScript : MonoBehaviour
         Gizmos.DrawWireSphere(pointR.transform.position, Distancefrompoint);
         Gizmos.DrawLine(pointL.transform.position, pointR.transform.position);
         Gizmos.DrawWireSphere(transform.position, DistanceToEngage);
-    }
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            HP = HP - damage;
-        }
     }
 }

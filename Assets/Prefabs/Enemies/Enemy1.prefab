@@ -75,6 +75,7 @@ GameObject:
   - component: {fileID: 8634379076151115444}
   - component: {fileID: 153676173328732610}
   - component: {fileID: 3844960976643636066}
+  - component: {fileID: 8093642886483181023}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Enemy
@@ -191,8 +192,6 @@ MonoBehaviour:
   pointL: {fileID: 649645265413369166}
   pointR: {fileID: 1974808376997995518}
   speed: 4
-  HP: 0
-  resistance: 0
   Distancefrompoint: 0.5
 --- !u!61 &3844960976643636066
 BoxCollider2D:
@@ -239,6 +238,20 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.64, y: 0.64}
   m_EdgeRadius: 0
+--- !u!114 &8093642886483181023
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2940982584418858062}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5567ba2c1ae34104bab6ae7dcc8f8099, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  HP: 0
+  resistance: 0
 --- !u!1 &4984800028950359774
 GameObject:
   m_ObjectHideFlags: 0

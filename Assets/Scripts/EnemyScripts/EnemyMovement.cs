@@ -16,8 +16,6 @@ public class EnemyMovement : MonoBehaviour
     [Header("Enemy Variables")]
     //
     public float speed;
-    public float HP;
-    public float resistance;
 
     [Header("Path Variables")]
     public float Distancefrompoint;
@@ -30,7 +28,6 @@ public class EnemyMovement : MonoBehaviour
         anima = GetComponent<Animator>();
         CurrentPoint = pointR.transform;
         damage = GameObject.FindWithTag("Player").GetComponent<WeaponStats>().returnDamage();
-        damage = damage - (damage * (resistance / 100));
     }
 
     // Update is called once per frame
@@ -55,10 +52,6 @@ public class EnemyMovement : MonoBehaviour
             CurrentPoint = pointR.transform;
             flip();
         }
-        if (HP <= 0)
-        {
-            Destroy(gameObject);
-        }
     
     }
     private void flip()
@@ -72,12 +65,5 @@ public class EnemyMovement : MonoBehaviour
         Gizmos.DrawWireSphere(pointL.transform.position, Distancefrompoint);
         Gizmos.DrawWireSphere(pointR.transform.position, Distancefrompoint);
         Gizmos.DrawLine(pointL.transform.position, pointR.transform.position);
-    }
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            HP = HP - damage;
-        }
     }
 }

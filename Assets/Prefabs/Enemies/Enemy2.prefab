@@ -109,6 +109,7 @@ GameObject:
   - component: {fileID: 8713125040173699543}
   - component: {fileID: 1240943082152523231}
   - component: {fileID: 3427136308393401759}
+  - component: {fileID: 8695367590250013094}
   m_Layer: 0
   m_Name: Body
   m_TagString: Enemy
@@ -125,7 +126,7 @@ Transform:
   m_GameObject: {fileID: 5212183099349503548}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.2587654, y: -0.06, z: -0.024710389}
+  m_LocalPosition: {x: -5.85, y: -0.6, z: -0.024710389}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -149,8 +150,6 @@ MonoBehaviour:
   DistanceToEngage: 1
   speed1: 2
   Distancefrompoint: 1
-  HP: 0
-  resistance: 0
 --- !u!212 &8713125040173699543
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -275,3 +274,17 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.915409, y: 1.0512369}
   m_EdgeRadius: 0
+--- !u!114 &8695367590250013094
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5212183099349503548}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5567ba2c1ae34104bab6ae7dcc8f8099, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  HP: 100
+  resistance: 0
