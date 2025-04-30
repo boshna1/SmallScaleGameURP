@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: -614331588291640750}
   m_Layer: 0
   m_Name: Arrow
-  m_TagString: Untagged
+  m_TagString: Weapon
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -143,12 +143,12 @@ CapsuleCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  m_Size: {x: 1, y: 2}
-  m_Direction: 0
+  m_Offset: {x: 0.016232971, y: 0.04915414}
+  m_Size: {x: 0.9987633, y: 2.1908338}
+  m_Direction: 1
 --- !u!114 &-614331588291640750
 MonoBehaviour:
   m_ObjectHideFlags: 0
