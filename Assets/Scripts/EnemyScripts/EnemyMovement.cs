@@ -12,7 +12,7 @@ public class EnemyMovement : MonoBehaviour
     private Animator anima;
     private Transform CurrentPoint;
     private float damage;
-
+    private Vector2 Locations;
     [Header("Enemy Variables")]
     //
     public float speed;
@@ -23,7 +23,7 @@ public class EnemyMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        Locations = transform.position;
         rb = GetComponent<Rigidbody2D>();
         anima = GetComponent<Animator>();
         CurrentPoint = pointR.transform;
@@ -34,15 +34,15 @@ public class EnemyMovement : MonoBehaviour
     void Update()
     {
         Vector2 point = CurrentPoint.position - transform.position;
-        if(CurrentPoint== pointR.transform)
+        if (CurrentPoint == pointR.transform)
         {
             rb.velocity = new Vector2(speed, 0);
         }
-        if(CurrentPoint == pointL.transform)
+        if (CurrentPoint == pointL.transform)
         {
             rb.velocity = new Vector2(-speed, 0);
         }
-        if(Vector2.Distance(transform.position, CurrentPoint.position) < Distancefrompoint && CurrentPoint == pointR.transform)
+        if (Vector2.Distance(transform.position, CurrentPoint.position) < Distancefrompoint && CurrentPoint == pointR.transform)
         {
             CurrentPoint = pointL.transform;
             flip();
@@ -52,7 +52,7 @@ public class EnemyMovement : MonoBehaviour
             CurrentPoint = pointR.transform;
             flip();
         }
-    
+
     }
     private void flip()
     {

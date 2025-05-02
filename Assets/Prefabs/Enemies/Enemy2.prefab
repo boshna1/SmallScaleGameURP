@@ -42,7 +42,7 @@ GameObject:
   - component: {fileID: 620589567007216893}
   m_Layer: 0
   m_Name: Enemy2
-  m_TagString: Enemy
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -286,5 +286,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5567ba2c1ae34104bab6ae7dcc8f8099, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DamageText: {fileID: 4186720646553744965, guid: f0715897a5726a541ab2d5c4addebd9a, type: 3}
   HP: 100
   resistance: 0

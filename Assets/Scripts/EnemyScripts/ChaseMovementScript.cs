@@ -75,7 +75,7 @@ public class ChaseMovementScript : MonoBehaviour
 
             //Enemy follows player
             transform.position = Vector2.MoveTowards(this.transform.position, player.transform.position, speed2 * Time.deltaTime);
-            transform.rotation = Quaternion.Euler(Vector3.forward * angle);
+            //transform.rotation = Quaternion.Euler(Vector3.forward * angle);
         }
 
 

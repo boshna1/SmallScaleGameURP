@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 649645265413369166}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -9.48, y: -3.64, z: 0}
+  m_LocalPosition: {x: -9.48, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -56,7 +56,7 @@ Transform:
   m_GameObject: {fileID: 1974808376997995518}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 9.43, y: -3.64, z: 0}
+  m_LocalPosition: {x: 9.43, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -92,7 +92,7 @@ Transform:
   m_GameObject: {fileID: 2940982584418858062}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -6.84, y: -3.64, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -250,7 +250,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5567ba2c1ae34104bab6ae7dcc8f8099, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  HP: 0
+  DamageText: {fileID: 4186720646553744965, guid: f0715897a5726a541ab2d5c4addebd9a, type: 3}
+  HP: 100
   resistance: 0
 --- !u!1 &4984800028950359774
 GameObject:
@@ -263,7 +264,7 @@ GameObject:
   - component: {fileID: 8736700318233781537}
   m_Layer: 0
   m_Name: Enemy1
-  m_TagString: Enemy
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -281,8 +282,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 7933396872516484810}
   - {fileID: 1450284950375557426}
   - {fileID: 2282892497985048605}
-  - {fileID: 7933396872516484810}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
