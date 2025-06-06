@@ -12,7 +12,6 @@ public class EnemyMovement : MonoBehaviour
     private Animator anima;
     private Transform CurrentPoint;
     private float damage;
-    private Vector2 Locations;
     [Header("Enemy Variables")]
     //
     public float speed;
@@ -23,11 +22,9 @@ public class EnemyMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Locations = transform.position;
         rb = GetComponent<Rigidbody2D>();
         anima = GetComponent<Animator>();
         CurrentPoint = pointR.transform;
-        damage = GameObject.FindWithTag("Player").GetComponent<WeaponStats>().returnDamage();
     }
 
     // Update is called once per frame
