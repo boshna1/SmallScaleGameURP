@@ -31,7 +31,7 @@ public class BasicArrow : MonoBehaviour
             arrowXTowards = Mathf.MoveTowards(arrowXTowards, 5, 0.5f);
         }
         Debug.Log(rb.angularVelocity);
-        rb.velocity = arrowForce;
+        rb.linearVelocity = arrowForce;
     }
 
     public void StartDropOff()

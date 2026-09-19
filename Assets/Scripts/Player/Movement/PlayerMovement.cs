@@ -106,11 +106,11 @@ public class PlayerMovement : MonoBehaviour
         {
             PassEnableDash(false);
             residueSpeedX = Mathf.MoveTowards(residueSpeedX, 0, 1);
-            rb.velocity = new Vector2(residueSpeedX, 0) + new Vector2(_moveDirection.x * moveSpeed, rb.velocity.y);
+            rb.linearVelocity = new Vector2(residueSpeedX, 0) + new Vector2(_moveDirection.x * moveSpeed, rb.linearVelocity.y);
         }
         else
         {    
-            rb.velocity = new Vector2(_moveDirection.x * moveSpeed, rb.velocity.y);
+            rb.linearVelocity = new Vector2(_moveDirection.x * moveSpeed, rb.linearVelocity.y);
         }
     }
 
@@ -138,7 +138,7 @@ public class PlayerMovement : MonoBehaviour
         if (isGrounded || enableDoubleJump && jumpCount < maxJump)
         {           
             jumpCount++;
-            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
             isGrounded = false;
             if (name == "PlayerSword")
             {
@@ -210,8 +210,8 @@ public class PlayerMovement : MonoBehaviour
 
     public void Hop(float y)
     {
-        rb.velocity = Vector2.zero;
-        rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y + y);
+        rb.linearVelocity = Vector2.zero;
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y + y);
         isGrounded = false;
     }
 
@@ -223,7 +223,7 @@ public class PlayerMovement : MonoBehaviour
     public void DashingFunction()
     {
         dashTime += Time.fixedDeltaTime;
-        rb.velocity = new Vector2(dashVelocityX, rb.velocity.y);
+        rb.linearVelocity = new Vector2(dashVelocityX, rb.linearVelocity.y);
         if (dashForceX > dashFalloff)
         {
             dashVelocityX = Mathf.Lerp(dashVelocityX, 0, dashTime / dashFallOffDuration);
@@ -243,7 +243,7 @@ public class PlayerMovement : MonoBehaviour
     public void KnockBackFunction()
     {
         knockbackTime += Time.fixedDeltaTime;
-        rb.velocity = new Vector2(knockbackVelocity.x, rb.velocity.y);
+        rb.linearVelocity = new Vector2(knockbackVelocity.x, rb.linearVelocity.y);
         if (knockbackX > knockbackFalloff)
         {
             knockbackVelocity.x = Mathf.Lerp(knockbackVelocity.x, 0, knockbackTime / knockbackFallOffDuration);

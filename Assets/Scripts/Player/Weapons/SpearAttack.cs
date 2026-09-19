@@ -205,7 +205,7 @@ public class SpearAttack : MonoBehaviour
         //in air facing left or right + no vertical, listens for key presses
         if ((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)) && !Input.GetKey(KeyCode.S) && !Input.GetKey(KeyCode.W))
         {
-            GameObject temp = Instantiate(spearProjectile, new Vector2(transform.position.x + facingHorizontal, transform.position.y), Quaternion.identity, transform);
+            GameObject temp = Instantiate(spearProjectile, new Vector2(transform.position.x + facingHorizontal, transform.position.y), Quaternion.identity);
             if (Input.GetKey(KeyCode.A))
             {
                 temp.transform.rotation = Quaternion.Euler(0, 0, -180);
@@ -224,7 +224,7 @@ public class SpearAttack : MonoBehaviour
         //if none are pressed
         else if ((!Input.GetKey(KeyCode.A) && !Input.GetKey(KeyCode.D)) && !Input.GetKey(KeyCode.S) && !Input.GetKey(KeyCode.W))
         {
-            GameObject temp = Instantiate(spearProjectile, new Vector2(transform.position.x + facingHorizontal, transform.position.y), Quaternion.identity, transform);
+            GameObject temp = Instantiate(spearProjectile, new Vector2(transform.position.x + facingHorizontal, transform.position.y), Quaternion.identity);
             if (facingHorizontal == 1)
             {
                 pm.EnableKnockBack(new Vector2(-hopModifierX, 0), hopModifierX, knockbackFallOff, knockbackFallOffDuration, knockbackDuration);
@@ -242,7 +242,7 @@ public class SpearAttack : MonoBehaviour
         //in air up or down + movment
         else if (((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)) || ((!Input.GetKey(KeyCode.A) || !Input.GetKey(KeyCode.D))) && (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S))))
         {
-            GameObject temp = Instantiate(spearProjectile, new Vector2(transform.position.x, transform.position.y + facingVertical), Quaternion.identity, transform);
+            GameObject temp = Instantiate(spearProjectile, new Vector2(transform.position.x, transform.position.y + facingVertical), Quaternion.identity);
             //Up Left
             if (Input.GetKey(KeyCode.W) && (Input.GetKey(KeyCode.A)))
             {
