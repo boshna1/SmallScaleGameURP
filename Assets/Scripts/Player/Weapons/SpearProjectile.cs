@@ -16,7 +16,6 @@ public class SpearProjectile : MonoBehaviour
 
     void Update()
     {
-        Debug.Log(transform.rotation.eulerAngles.z);
         if (transform.rotation.eulerAngles.z == 0)
         {
             rb.linearVelocity = new Vector2(forceX,0);

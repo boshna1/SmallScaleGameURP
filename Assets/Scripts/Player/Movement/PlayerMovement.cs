@@ -1,8 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq.Expressions;
-using Unity.IO.LowLevel.Unsafe;
-using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -29,7 +26,6 @@ public class PlayerMovement : MonoBehaviour
     [Header("Player General Movement Variables")]
     public Rigidbody2D rb;
     public float moveSpeed;    
-    public int facingHorizontal;
     public Vector2 _moveDirection;
     
 
@@ -68,6 +64,9 @@ public class PlayerMovement : MonoBehaviour
     public InputActionReference jump;
     public InputActionReference dash;
 
+    PlayerInput pi;
+    Gamepad currentGamepad;
+
     SwordAttack swordAttack;
     SpearAttack spearAttack;
     HammerAttack hammerAttack;
@@ -77,6 +76,23 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField] float landSoundThreshold = 3;
 
+    public enum DirX
+    {
+        Left,
+        Right,
+        None,
+    }
+    public enum DirY
+    {
+        Up,
+        Down,
+        None
+    }
+
+    public DirX dirX;
+    public DirY dirY;
+
+
     private void Start()
     {
         isKnockback = false;    
@@ -84,7 +100,7 @@ public class PlayerMovement : MonoBehaviour
         {
             swordAttack = GetComponent<SwordAttack>();
         }
-        if (name == "PlayerSpear")
+        if (name == "PlayerSpear Variant 1")
         {
             spearAttack = GetComponent < SpearAttack>();
         }
@@ -96,20 +112,11 @@ public class PlayerMovement : MonoBehaviour
         {
             bowAttack = GetComponent<BowAttack>();
         }
-
     }
 
     private void Update()
     {
-        _moveDirection = move.action.ReadValue<Vector2>();
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            facingHorizontal = -1;
-        }
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            facingHorizontal = 1;
-        }
+
     }
 
     private void FixedUpdate()
@@ -129,7 +136,7 @@ public class PlayerMovement : MonoBehaviour
             rb.linearVelocity = new Vector2(residueSpeedX, 0) + new Vector2(_moveDirection.x * moveSpeed, rb.linearVelocity.y);
         }
         else
-        {    
+        {
             rb.linearVelocity = new Vector2(_moveDirection.x * moveSpeed, rb.linearVelocity.y);
         }
         if (rb.linearVelocityY < 0 && movementState == MovementState.WallDraging)
@@ -142,6 +149,12 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    public void OnMove(InputValue value)
+    {
+        _moveDirection = value.Get<Vector2>();
+        CalculateDirections();
+    }
+
     private void OnEnable()
     {
         move.action.Enable();
@@ -149,21 +162,55 @@ public class PlayerMovement : MonoBehaviour
         dash.action.Enable();
         jump.action.started += Jump;
         dash.action.started += Dash;
+        InputSystem.onDeviceChange += OnDeviceChange;
+        pi.onControlsChanged += OnControlsChanged;
     }
 
     private void OnDisable()
     {
+
         move.action.Disable();
         jump.action.Disable();
         dash.action.Disable();
 
         jump.action.started -= Jump;
         dash.action.started -= Dash;
+        InputSystem.onDeviceChange -= OnDeviceChange;
+        pi.onControlsChanged -= OnControlsChanged;
+    }
+    
+    public void OnControlsChanged(PlayerInput currentInput)
+    {
+        if (currentInput.currentControlScheme == "Gamepad")
+        {
+            pi.SwitchCurrentControlScheme("Gamepad", Gamepad.current);
+        }
+        else if (currentInput.currentControlScheme == "Keyboard")
+        {
+            pi.SwitchCurrentControlScheme("Keyboard", Keyboard.current);
+        }
+        Debug.Log("Changed input to" + currentInput.currentControlScheme);
+    }
+
+    public void OnDeviceChange(InputDevice device, InputDeviceChange change)
+    {
+        if (device is Gamepad)
+        {
+            switch (change)
+            {
+                case InputDeviceChange.Added:
+                    Debug.Log("Added device");
+                    break;
+                case InputDeviceChange.Removed:
+                    Debug.Log("Removed device");
+                    break;
+            }
+        }
     }
 
     private void Jump(InputAction.CallbackContext obj)
     {
-        if (isGrounded || enableDoubleJump && jumpCount < maxJump)
+        if (isGrounded || enableDoubleJump && jumpCount < maxJump && obj.performed)
         {           
             jumpCount++;
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
@@ -172,7 +219,7 @@ public class PlayerMovement : MonoBehaviour
             {
                 swordAttack.BufferAerial();
             }
-            if (name == "PlayerSpear")
+            if (name == "PlayerSpear Variant 1")
             {
                 spearAttack.BufferAerial();
             }
@@ -186,7 +233,7 @@ public class PlayerMovement : MonoBehaviour
         {
             AudioManager.Instance.PlaySoundAmbientPitch("Whoosh",2.5f,0.8f);
             PassEnableDash(true);
-            dashVelocityX = _moveDirection.x + facingHorizontal * dashForceX;
+            dashVelocityX = _moveDirection.x * dashForceX;
             dashTime = 0;
             isDashing = true;
             dashFallOffDuration = 2;
@@ -197,7 +244,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void Lunge(float modifier)
     {
-        dashVelocityX = _moveDirection.x + facingHorizontal * modifier;
+        dashVelocityX = _moveDirection.x * modifier;
         dashTime = 0;
         isDashing = true;
         isLunging = true;
@@ -330,7 +377,7 @@ public class PlayerMovement : MonoBehaviour
         {
             swordAttack.EnableDashAttack(condition);
         }
-        if (name == "PlayerSpear")
+        if (name == "PlayerSpear Variant 1")
         {
             spearAttack.EnableDashAttack(condition);
         }
@@ -344,6 +391,39 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    public void CalculateDirections()
+    {
+        if (Mathf.Abs(_moveDirection.x) > 0.2f)
+        {
+            if (_moveDirection.x < 0)
+            {
+                dirX = DirX.Left;
+            }
+            else if (_moveDirection.x > 0)
+            {
+                dirX = DirX.Right;
+            }
+            else
+            {
+                dirX = DirX.None;
+            }
+        }
+        if (Mathf.Abs(_moveDirection.y) > 0.2f)
+        {
+            if (_moveDirection.y < 0)
+            {
+                dirY = DirY.Down;
+            }
+            else if (_moveDirection.y > 0)
+            {
+                dirY = DirY.Up;
+            }
+            else
+            {
+                dirY = DirY.None;
+            }
+        }
+    }
 
 }
 
