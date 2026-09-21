@@ -9,6 +9,23 @@ using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
+    public enum MovementState
+    {
+        Idle,
+        Walking,
+        Sprinting,
+        WallDraging,
+        Grounded,
+        Airborne
+    }
+
+    public enum CombatState
+    {
+        Attacking
+    }
+
+    public MovementState movementState;
+
     [Header("Player General Movement Variables")]
     public Rigidbody2D rb;
     public float moveSpeed;    
@@ -56,6 +73,9 @@ public class PlayerMovement : MonoBehaviour
     HammerAttack hammerAttack;
     BowAttack bowAttack;
 
+    Vector2 normal;
+
+    [SerializeField] float landSoundThreshold = 3;
 
     private void Start()
     {
@@ -112,6 +132,14 @@ public class PlayerMovement : MonoBehaviour
         {    
             rb.linearVelocity = new Vector2(_moveDirection.x * moveSpeed, rb.linearVelocity.y);
         }
+        if (rb.linearVelocityY < 0 && movementState == MovementState.WallDraging)
+        {
+            rb.gravityScale = 1;
+        }
+        else
+        {
+            rb.gravityScale = 5;
+        }
     }
 
     private void OnEnable()
@@ -156,6 +184,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!isDashing)
         {
+            AudioManager.Instance.PlaySoundAmbientPitch("Whoosh",2.5f,0.8f);
             PassEnableDash(true);
             dashVelocityX = _moveDirection.x + facingHorizontal * dashForceX;
             dashTime = 0;
@@ -179,10 +208,34 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        
         if (collision.transform.tag == "Ground")
         {
-            isGrounded = true;
-            jumpCount = 0;
+            foreach (ContactPoint2D contact in collision.contacts)
+            {
+                normal = contact.normal;
+            }
+            
+            if (normal.x != 0)
+            {
+                movementState = MovementState.WallDraging;
+                if (rb.linearVelocityY < landSoundThreshold)
+                {
+                    AudioManager.Instance.PlaySoundAmbientPitch("GroundLand", 2.5f, 0.3f);   
+                }
+            }
+            else
+            {
+                movementState = MovementState.Grounded;
+
+            }
+            if (normal.y != -1)
+            {
+                AudioManager.Instance.PlaySoundAmbientPitch("GroundLand", AudioManager.Instance.defaultPitch, 0.3f);
+                movementState = MovementState.Grounded;
+                isGrounded = true;
+                jumpCount = 0;
+            }           
         }
     }
     private void OnCollisionExit2D(Collision2D collision)
@@ -190,6 +243,9 @@ public class PlayerMovement : MonoBehaviour
         if (collision.transform.tag == "Ground")
         {
             isGrounded = false;
+            movementState = MovementState.Airborne;
+            AudioManager.Instance.PlaySoundAmbientPitch("GroundLand", 2.5f, 0.3f);
+
         }
     }
 
@@ -287,6 +343,8 @@ public class PlayerMovement : MonoBehaviour
             bowAttack.EnableDashAttack(condition);
         }
     }
+
+
 }
 
 

@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -10,6 +11,8 @@ public  class AudioManager : MonoBehaviour {
      bool isAudioPaused;
     [SerializeField] List<AudioClip> sfxList;
     [SerializeField] List<AudioClip> musicList;
+
+    public float defaultPitch = 1.91f;
 
     void Awake()
     {
@@ -35,6 +38,15 @@ public  class AudioManager : MonoBehaviour {
         audioSource.PlayOneShot(tempClip, vol);
     }
 
+    public void PlaySoundAmbientPitch(string clipName, float pitch, float vol)
+    {
+        audioSource.pitch = pitch;
+        Debug.Log(sfxList.Find(sfx => sfx.name == clipName));
+        AudioClip tempClip = sfxList.Find(sfx => sfx.name == clipName);
+        audioSource.PlayOneShot(tempClip, vol);
+        StartCoroutine(WaitClipLength(tempClip.length));
+    }
+
 
     public  void StopSounds()
     {
@@ -51,6 +63,12 @@ public  class AudioManager : MonoBehaviour {
         {
             audioSource.Pause();
         }
+    }
+
+    IEnumerator WaitClipLength(float length)
+    {
+        yield return new WaitForSeconds(length);
+        audioSource.pitch = defaultPitch;
     }
 
 }
