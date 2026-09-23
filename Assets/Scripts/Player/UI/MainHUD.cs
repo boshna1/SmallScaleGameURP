@@ -18,13 +18,17 @@ public class MainHUD : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        playerHp = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerHp>();
-        playerStats = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerStats>();
+        
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (playerHp == null)
+        {
+            playerHp = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerHp>();
+            playerStats = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerStats>();
+        }
         UpdateHealth();
         UpdateHealthFloat();
         UpdateXP();

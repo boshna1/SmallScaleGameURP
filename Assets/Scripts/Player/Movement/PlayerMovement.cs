@@ -1,18 +1,31 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq.Expressions;
-using Unity.IO.LowLevel.Unsafe;
-using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
+    public enum MovementState
+    {
+        Idle,
+        Walking,
+        Sprinting,
+        WallDraging,
+        Grounded,
+        Airborne
+    }
+
+    public enum CombatState
+    {
+        Attacking
+    }
+
+    public MovementState movementState;
+
     [Header("Player General Movement Variables")]
     public Rigidbody2D rb;
     public float moveSpeed;    
-    public int facingHorizontal;
     public Vector2 _moveDirection;
     
 
@@ -51,20 +64,46 @@ public class PlayerMovement : MonoBehaviour
     public InputActionReference jump;
     public InputActionReference dash;
 
+    PlayerInput pi;
+    Gamepad currentGamepad;
+
     SwordAttack swordAttack;
     SpearAttack spearAttack;
     HammerAttack hammerAttack;
     BowAttack bowAttack;
 
+    Vector2 normal;
+
+    [SerializeField] float landSoundThreshold = 3;
+
+    public float baseLungeDist;
+
+    public enum DirX
+    {
+        Left,
+        Right,
+        None,
+    }
+    public enum DirY
+    {
+        Up,
+        Down,
+        None
+    }
+
+    public DirX dirX;
+    public DirY dirY;
+
 
     private void Start()
     {
+        pi = GetComponent<PlayerInput>();
         isKnockback = false;    
         if (name == "PlayerSword")
         {
             swordAttack = GetComponent<SwordAttack>();
         }
-        if (name == "PlayerSpear")
+        if (name == "PlayerSpear Variant 1")
         {
             spearAttack = GetComponent < SpearAttack>();
         }
@@ -76,20 +115,11 @@ public class PlayerMovement : MonoBehaviour
         {
             bowAttack = GetComponent<BowAttack>();
         }
-
     }
 
     private void Update()
     {
-        _moveDirection = move.action.ReadValue<Vector2>();
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            facingHorizontal = -1;
-        }
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            facingHorizontal = 1;
-        }
+
     }
 
     private void FixedUpdate()
@@ -106,12 +136,26 @@ public class PlayerMovement : MonoBehaviour
         {
             PassEnableDash(false);
             residueSpeedX = Mathf.MoveTowards(residueSpeedX, 0, 1);
-            rb.velocity = new Vector2(residueSpeedX, 0) + new Vector2(_moveDirection.x * moveSpeed, rb.velocity.y);
+            rb.linearVelocity = new Vector2(residueSpeedX, 0) + new Vector2(_moveDirection.x * moveSpeed, rb.linearVelocity.y);
         }
         else
-        {    
-            rb.velocity = new Vector2(_moveDirection.x * moveSpeed, rb.velocity.y);
+        {
+            rb.linearVelocity = new Vector2(_moveDirection.x * moveSpeed, rb.linearVelocity.y);
         }
+        if (rb.linearVelocityY < 0 && movementState == MovementState.WallDraging)
+        {
+            rb.gravityScale = 1;
+        }
+        else
+        {
+            rb.gravityScale = 5;
+        }
+    }
+
+    public void OnMove(InputValue value)
+    {
+        _moveDirection = value.Get<Vector2>();
+        CalculateDirections();
     }
 
     private void OnEnable()
@@ -121,30 +165,64 @@ public class PlayerMovement : MonoBehaviour
         dash.action.Enable();
         jump.action.started += Jump;
         dash.action.started += Dash;
+        InputSystem.onDeviceChange += OnDeviceChange;
+        pi.onControlsChanged += OnControlsChanged;
     }
 
     private void OnDisable()
     {
+
         move.action.Disable();
         jump.action.Disable();
         dash.action.Disable();
-
         jump.action.started -= Jump;
         dash.action.started -= Dash;
+        InputSystem.onDeviceChange -= OnDeviceChange;
+        pi.onControlsChanged -= OnControlsChanged;
+    }
+    
+
+    public void OnControlsChanged(PlayerInput currentInput)
+    {
+        if (currentInput.currentControlScheme == "Gamepad")
+        {
+            pi.SwitchCurrentControlScheme("Gamepad", Gamepad.current);
+        }
+        else if (currentInput.currentControlScheme == "Keyboard")
+        {
+            pi.SwitchCurrentControlScheme("Keyboard", Keyboard.current);
+        }
+        Debug.Log("Changed input to" + currentInput.currentControlScheme);
+    }
+
+    public void OnDeviceChange(InputDevice device, InputDeviceChange change)
+    {
+        if (device is Gamepad)
+        {
+            switch (change)
+            {
+                case InputDeviceChange.Added:
+                    Debug.Log("Added device");
+                    break;
+                case InputDeviceChange.Removed:
+                    Debug.Log("Removed device");
+                    break;
+            }
+        }
     }
 
     private void Jump(InputAction.CallbackContext obj)
     {
-        if (isGrounded || enableDoubleJump && jumpCount < maxJump)
+        if (isGrounded || movementState == MovementState.WallDraging || enableDoubleJump && jumpCount < maxJump && obj.performed)
         {           
             jumpCount++;
-            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
             isGrounded = false;
             if (name == "PlayerSword")
             {
                 swordAttack.BufferAerial();
             }
-            if (name == "PlayerSpear")
+            if (name == "PlayerSpear Variant 1")
             {
                 spearAttack.BufferAerial();
             }
@@ -156,8 +234,9 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!isDashing)
         {
+            AudioManager.Instance.PlaySoundAmbientPitch("Whoosh",2.5f,0.8f);
             PassEnableDash(true);
-            dashVelocityX = _moveDirection.x + facingHorizontal * dashForceX;
+            dashVelocityX = _moveDirection.x * dashForceX;
             dashTime = 0;
             isDashing = true;
             dashFallOffDuration = 2;
@@ -168,7 +247,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void Lunge(float modifier)
     {
-        dashVelocityX = _moveDirection.x + facingHorizontal * modifier;
+        dashVelocityX = (_moveDirection.x + baseLungeDist) * modifier ;
         dashTime = 0;
         isDashing = true;
         isLunging = true;
@@ -179,17 +258,45 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        
         if (collision.transform.tag == "Ground")
         {
-            isGrounded = true;
-            jumpCount = 0;
+            foreach (ContactPoint2D contact in collision.contacts)
+            {
+                normal = contact.normal;
+            }
+            
+            if (normal.x != 0 && rb.linearVelocityY < 0)
+            {
+                movementState = MovementState.WallDraging;
+                if (rb.linearVelocityY < landSoundThreshold)
+                {
+                    AudioManager.Instance.PlaySoundAmbientPitch("GroundLand", 2.5f, 0.3f);   
+                }
+            }
+            else if (normal.y != -1)
+            {
+                AudioManager.Instance.PlaySoundAmbientPitch("GroundLand", AudioManager.Instance.defaultPitch, 0.3f);
+                movementState = MovementState.Grounded;
+                isGrounded = true;
+                jumpCount = 0;
+            }           
         }
     }
     private void OnCollisionExit2D(Collision2D collision)
     {
         if (collision.transform.tag == "Ground")
         {
-            isGrounded = false;
+            
+            if (rb.linearVelocityY != 0)
+            {
+                movementState = MovementState.Airborne;
+                isGrounded = false;
+                AudioManager.Instance.PlaySoundAmbientPitch("GroundLand", 2.5f, 0.3f);
+            }
+            
+            
+
         }
     }
 
@@ -210,8 +317,8 @@ public class PlayerMovement : MonoBehaviour
 
     public void Hop(float y)
     {
-        rb.velocity = Vector2.zero;
-        rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y + y);
+        rb.linearVelocity = Vector2.zero;
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y + y);
         isGrounded = false;
     }
 
@@ -223,7 +330,7 @@ public class PlayerMovement : MonoBehaviour
     public void DashingFunction()
     {
         dashTime += Time.fixedDeltaTime;
-        rb.velocity = new Vector2(dashVelocityX, rb.velocity.y);
+        rb.linearVelocity = new Vector2(dashVelocityX, rb.linearVelocity.y);
         if (dashForceX > dashFalloff)
         {
             dashVelocityX = Mathf.Lerp(dashVelocityX, 0, dashTime / dashFallOffDuration);
@@ -243,7 +350,7 @@ public class PlayerMovement : MonoBehaviour
     public void KnockBackFunction()
     {
         knockbackTime += Time.fixedDeltaTime;
-        rb.velocity = new Vector2(knockbackVelocity.x, rb.velocity.y);
+        rb.linearVelocity = new Vector2(knockbackVelocity.x, rb.linearVelocity.y);
         if (knockbackX > knockbackFalloff)
         {
             knockbackVelocity.x = Mathf.Lerp(knockbackVelocity.x, 0, knockbackTime / knockbackFallOffDuration);
@@ -274,7 +381,7 @@ public class PlayerMovement : MonoBehaviour
         {
             swordAttack.EnableDashAttack(condition);
         }
-        if (name == "PlayerSpear")
+        if (name == "PlayerSpear Variant 1")
         {
             spearAttack.EnableDashAttack(condition);
         }
@@ -287,6 +394,48 @@ public class PlayerMovement : MonoBehaviour
             bowAttack.EnableDashAttack(condition);
         }
     }
+
+    public void CalculateDirections()
+    {
+        if (Mathf.Abs(_moveDirection.x) > 0.2f)
+        {
+            if (_moveDirection.x < 0)
+            {
+                dirX = DirX.Left;
+                baseLungeDist = -baseLungeDist;
+                spearAttack.xDirMod = -1;
+            }
+            else if (_moveDirection.x > 0)
+            {
+                dirX = DirX.Right;
+                baseLungeDist = 0.6f;
+                spearAttack.xDirMod = 1;
+            }
+            else
+            {
+                dirX = DirX.None;
+            }
+        }
+        if (Mathf.Abs(_moveDirection.y) > 0.2f)
+        {
+            if (_moveDirection.y < 0)
+            {
+                dirY = DirY.Down;
+                spearAttack.yDirMod = -1;
+            }
+            else if (_moveDirection.y > 0)
+            {
+                dirY = DirY.Up;
+                spearAttack.yDirMod = 1;
+            }
+            
+        }
+        else
+        {
+            dirY = DirY.None;
+        }
+    }
+
 }
 
 

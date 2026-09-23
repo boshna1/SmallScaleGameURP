@@ -15,8 +15,12 @@ public class SpearAttack : MonoBehaviour
     //basic
     public float[] basicAnimationTime = new float[3];
     public float[] basicAttackLungeDist = new float[3];
+
+    public float[] basicUpAnimationTime = new float[1];
     public bool enableBasicAttack;
     [SerializeField] GameObject[] hitBoxBasic = new GameObject[3];
+
+    [SerializeField] GameObject[] hitBoxUpBasic = new GameObject[1];
     public float basicDestroyTime;
     public bool isSpearSpam;
     public float spamTime;
@@ -44,22 +48,25 @@ public class SpearAttack : MonoBehaviour
 
     [Header("Player Facing")]
     //determines player directoin
-    int facingHorizontal = 0;
-    int facingVertical = 0;
 
+    PlayerInput pi;
     PlayerMovement pm;
     Rigidbody2D rb;
 
     [Header("Input Assignment")]
     public InputActionReference attack;
 
+    public int xDirMod = -1;
+    public int yDirMod = -1;
+
     void Start()
     {
+        xDirMod = -1;
+        yDirMod = -1;
+        pi = GetComponent<PlayerInput>();
         //attatches other components
         pm = GetComponent<PlayerMovement>();
         rb = GetComponent<Rigidbody2D>();
-        facingHorizontal = 1;
-        facingVertical = 1;
         enableAttack = true;
         enableBasicAttack = true;
         enableBasicAerial = false;
@@ -69,22 +76,6 @@ public class SpearAttack : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            facingHorizontal = -1;
-        }
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            facingHorizontal = 1;
-        }
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            facingVertical = -1;
-        }
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            facingVertical = 1;
-        }
         //calls if player is grounded from player movment script
         if (animationCount == animationCountMax && pm.ReturnIsGrounded())
         {
@@ -106,19 +97,24 @@ public class SpearAttack : MonoBehaviour
     {
         attack.action.Enable();
         attack.action.started += Attack;
+
     }
 
     private void OnDisable()
     {
         attack.action.Disable();
         attack.action.started -= Attack;
+
     }
+
+    
 
     private void Attack(InputAction.CallbackContext obj)
     {
-        if (enableAttack && enableBasicAttack && pm.ReturnIsGrounded() && !pm.ReturnIsDashing())
+        if (enableAttack && enableBasicAttack && pm.ReturnIsGrounded() && !pm.ReturnIsDashing() && obj.started)
         {
             BasicAttack();
+            Debug.Log("pass1");
         }
         else if (enableAttack && !pm.ReturnIsGrounded() && enableBasicAerial)
         {
@@ -161,36 +157,42 @@ public class SpearAttack : MonoBehaviour
         enableBasicAerial = true;
     }
 
+    
+
     public void BasicAttack()
     {
+        Debug.Log("pass2");
+        pm.CalculateDirections();
         //calls function in player movment to lunge
         pm.Lunge(basicAttackLungeDist[animationCount]);
         int random = Random.Range(-25, 25);
         if (!isSpearSpam)
         {
-            GameObject temp = Instantiate(hitBoxBasic[animationCount], new Vector2(this.transform.position.x + facingHorizontal, this.transform.position.y), Quaternion.identity, transform);
-            if (facingHorizontal == 1) //changes direction of hitbox depending on where the player is facing by mirroring it using scale
+            if (pm.dirX != PlayerMovement.DirX.None && pm.dirY == PlayerMovement.DirY.None)
             {
-                temp.transform.localScale *= new Vector2(facingHorizontal, facingHorizontal);
+                Debug.Log("pass3");
+                GameObject temp = Instantiate(hitBoxBasic[animationCount], new Vector2(this.transform.position.x, this.transform.position.y), Quaternion.identity, transform);
+                temp.transform.localScale *= new Vector2(xDirMod, yDirMod);
+                Destroy(temp, 1f);
+                StartCoroutine(WaitAnimation(basicAnimationTime[animationCount], true));
             }
-            if (facingHorizontal == -1)
+            else if (pm.dirY == PlayerMovement.DirY.Up)
             {
-                temp.transform.localScale *= new Vector2(facingHorizontal, -facingHorizontal);
+                animationCount = 0;
+                GameObject temp = Instantiate(hitBoxUpBasic[animationCount], new Vector2(this.transform.position.x, this.transform.position.y), Quaternion.identity, transform);
+                temp.transform.localScale *= new Vector2(xDirMod, 1);
+                AnimationClip clipInfo = temp.GetComponent<Animator>().runtimeAnimatorController.animationClips[0];
+                StartCoroutine(WaitAnimation(clipInfo.length, true));
+                Destroy(temp, clipInfo.length + 0.5f);
+                animationCount = 0;
+                isSpearSpam = false;
             }
-            Destroy(temp, 1f);
-            StartCoroutine(WaitAnimation(basicAnimationTime[animationCount], true));
+            
         }
-        if (isSpearSpam)
+        else if (isSpearSpam && animationCount == 2)
         {
-            GameObject temp = Instantiate(hitBoxBasic[animationCount], new Vector2(transform.position.x + facingHorizontal, transform.position.y), Quaternion.Euler(0, 0, random), transform);
-            if (facingHorizontal == 1) //changes direction of hitbox depending on where the player is facing by mirroring it using scale
-            {
-                temp.transform.localScale *= new Vector2(facingHorizontal, facingHorizontal);
-            }
-            if (facingHorizontal == -1)
-            {
-                temp.transform.localScale *= new Vector2(facingHorizontal, -facingHorizontal);
-            }
+            GameObject temp = Instantiate(hitBoxBasic[animationCount], new Vector2(transform.position.x, transform.position.y), Quaternion.Euler(0, 0, random), transform);
+            temp.transform.localScale *= new Vector2(xDirMod, yDirMod);
             spamTime = Time.time;
             StartCoroutine(CheckSpamTime());
             Destroy(temp, 1f);
@@ -202,17 +204,19 @@ public class SpearAttack : MonoBehaviour
 
     public void AerialAttack()
     {
-        //in air facing left or right + no vertical, listens for key presses
-        if ((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)) && !Input.GetKey(KeyCode.S) && !Input.GetKey(KeyCode.W))
+        pm.dirY = PlayerMovement.DirY.None;
+        //in air facing left or left + no vertical, listens for key presses
+        if (pm._moveDirection.x != 0 && Mathf.Abs(pm._moveDirection.y) < 0.4f)
         {
-            GameObject temp = Instantiate(spearProjectile, new Vector2(transform.position.x + facingHorizontal, transform.position.y), Quaternion.identity, transform);
-            if (Input.GetKey(KeyCode.A))
+            
+            GameObject temp = Instantiate(spearProjectile, new Vector2(transform.position.x + pm._moveDirection.x, transform.position.y), Quaternion.identity);
+            if (pm.dirX == PlayerMovement.DirX.Left)
             {
                 temp.transform.rotation = Quaternion.Euler(0, 0, -180);
                 pm.EnableKnockBack(new Vector2(hopModifierX, 0), hopModifierX, knockbackFallOff, knockbackFallOffDuration, knockbackDuration);
                 pm.Hop(hopModifierY);
             }
-            if (Input.GetKey(KeyCode.D))
+            if (pm.dirX == PlayerMovement.DirX.Right)
             {
                 pm.EnableKnockBack(new Vector2(-hopModifierX, 0), hopModifierX, knockbackFallOff, knockbackFallOffDuration, knockbackDuration);
                 pm.Hop(hopModifierY);
@@ -222,15 +226,15 @@ public class SpearAttack : MonoBehaviour
             StartCoroutine(WaitAnimation(basicAerialAnimationTimeHorizontal, false));
         }
         //if none are pressed
-        else if ((!Input.GetKey(KeyCode.A) && !Input.GetKey(KeyCode.D)) && !Input.GetKey(KeyCode.S) && !Input.GetKey(KeyCode.W))
+        else if (pm._moveDirection.magnitude == 0)
         {
-            GameObject temp = Instantiate(spearProjectile, new Vector2(transform.position.x + facingHorizontal, transform.position.y), Quaternion.identity, transform);
-            if (facingHorizontal == 1)
+            GameObject temp = Instantiate(spearProjectile, new Vector2(transform.position.x + pm._moveDirection.x, transform.position.y), Quaternion.identity);
+            if (pm.dirX == PlayerMovement.DirX.Right)
             {
                 pm.EnableKnockBack(new Vector2(-hopModifierX, 0), hopModifierX, knockbackFallOff, knockbackFallOffDuration, knockbackDuration);
                 pm.Hop(hopModifierY);
             }
-            if (facingHorizontal == -1)
+            if (pm.dirX == PlayerMovement.DirX.Left)
             {
                 temp.transform.rotation = Quaternion.Euler(0, 0, -180);
                 pm.EnableKnockBack(new Vector2(hopModifierX, 0), hopModifierX, knockbackFallOff, knockbackFallOffDuration, knockbackDuration);
@@ -240,51 +244,51 @@ public class SpearAttack : MonoBehaviour
             StartCoroutine(WaitAnimation(basicAerialAnimationTimeHorizontal, false));
         }
         //in air up or down + movment
-        else if (((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)) || ((!Input.GetKey(KeyCode.A) || !Input.GetKey(KeyCode.D))) && (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S))))
+        else if ((Mathf.Abs(pm._moveDirection.x) > 0.4f && Mathf.Abs(pm._moveDirection.y) > 0.2f) || (Mathf.Abs(pm._moveDirection.x) < 0.2f && pm._moveDirection.y != 0))
         {
-            GameObject temp = Instantiate(spearProjectile, new Vector2(transform.position.x, transform.position.y + facingVertical), Quaternion.identity, transform);
+            GameObject temp = Instantiate(spearProjectile, new Vector2(transform.position.x, transform.position.y + pm._moveDirection.y), Quaternion.identity);
             //Up Left
-            if (Input.GetKey(KeyCode.W) && (Input.GetKey(KeyCode.A)))
+            if (pm.dirY == PlayerMovement.DirY.Up && pm.dirX == PlayerMovement.DirX.Left && Mathf.Abs(pm._moveDirection.x) > 0.2f)
             {
-                Debug.Log("Up Left");
+                Debug.Log("Up Right");
                 temp.transform.rotation = Quaternion.Euler(0, 0, 135);
                 pm.EnableKnockBack(new Vector2(hopModifierX, -hopModifierY), hopModifierX, knockbackFallOff, knockbackFallOffDuration, knockbackDuration);
                 pm.Hop(hopModifierY);
             }
-            //Up Right
-            if (Input.GetKey(KeyCode.W) && (Input.GetKey(KeyCode.D)))
+            //Up left
+            else if (pm.dirY == PlayerMovement.DirY.Up && pm.dirX == PlayerMovement.DirX.Right && Mathf.Abs(pm._moveDirection.x) > 0.2f )
             {
-                Debug.Log("Up Right");
+                Debug.Log("Up left");
                 temp.transform.rotation = Quaternion.Euler(0, 0, 45);
                 pm.EnableKnockBack(new Vector2(-hopModifierX, -hopModifierY), hopModifierX, knockbackFallOff, knockbackFallOffDuration, knockbackDuration);
                 pm.Hop(hopModifierY);
             }
-            //Down Left
-            if (Input.GetKey(KeyCode.S) && (Input.GetKey(KeyCode.A)))
+            //Down left
+            else if (pm.dirY == PlayerMovement.DirY.Down && pm.dirX == PlayerMovement.DirX.Left && Mathf.Abs(pm._moveDirection.x) > 0.2f)
             {
-                Debug.Log("Down Left");
+                Debug.Log("Down left");
                 temp.transform.rotation = Quaternion.Euler(0, 0, -135);
 
                 pm.EnableKnockBack(new Vector2(hopModifierX, hopModifierY), hopModifierX, knockbackFallOff, knockbackFallOffDuration, knockbackDuration);
                 pm.Hop(hopModifierY);
             }
-            //Down Right
-            if (Input.GetKey(KeyCode.S) && (Input.GetKey(KeyCode.D)))
+            //Down right
+            else if(pm.dirY == PlayerMovement.DirY.Down && pm.dirX == PlayerMovement.DirX.Right && Mathf.Abs(pm._moveDirection.x) > 0.2f)
             {
-                Debug.Log("Down Right");
+                Debug.Log("Down right");
                 temp.transform.rotation = Quaternion.Euler(0, 0, -45);
                 pm.EnableKnockBack(new Vector2(-hopModifierX, hopModifierY), hopModifierX, knockbackFallOff, knockbackFallOffDuration, knockbackDuration);
                 pm.Hop(hopModifierY);
             }
             //Down
-            if (Input.GetKey(KeyCode.S) && !Input.GetKey(KeyCode.A) && !Input.GetKey(KeyCode.D))
+            else if(pm.dirY == PlayerMovement.DirY.Down && Mathf.Abs(pm._moveDirection.x) < 0.2f)
             {
                 Debug.Log("Down");
                 temp.transform.rotation = Quaternion.Euler(0, 0, -90);
                 pm.Hop(hopModifierY);
             }
             //Up
-            if (Input.GetKey(KeyCode.W) && !Input.GetKey(KeyCode.A) && !Input.GetKey(KeyCode.D))
+            else if(pm.dirY == PlayerMovement.DirY.Up && Mathf.Abs(pm._moveDirection.x) < 0.2f)
             {
                 Debug.Log("Up");
                 temp.transform.rotation = Quaternion.Euler(0, 0, 90);
@@ -305,5 +309,4 @@ public class SpearAttack : MonoBehaviour
     {
         enableDashAttack = condition;
     }
-
 }

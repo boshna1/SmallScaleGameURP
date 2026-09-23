@@ -16,38 +16,37 @@ public class SpearProjectile : MonoBehaviour
 
     void Update()
     {
-        Debug.Log(transform.rotation.eulerAngles.z);
         if (transform.rotation.eulerAngles.z == 0)
         {
-            rb.velocity = new Vector2(forceX,0);
+            rb.linearVelocity = new Vector2(forceX,0);
         }
         if (transform.rotation.eulerAngles.z == -180 || transform.rotation.eulerAngles.z == 180)
         {
-            rb.velocity = new Vector2(-forceX, 0);
+            rb.linearVelocity = new Vector2(-forceX, 0);
         }
         if (transform.rotation.eulerAngles.z == 90)
         {
-            rb.velocity = new Vector2(0, forceY);
+            rb.linearVelocity = new Vector2(0, forceY);
         }
         if (transform.rotation.eulerAngles.z == 270)
         {
-            rb.velocity = new Vector2(0, -forceY);
+            rb.linearVelocity = new Vector2(0, -forceY);
         }
         if (IsAngleApproximately(transform.rotation.eulerAngles.z, 45))
         {
-            rb.velocity = new Vector2(forceX, forceY);
+            rb.linearVelocity = new Vector2(forceX, forceY);
         }
         if (transform.rotation.eulerAngles.z == 225)
         {
-            rb.velocity = new Vector2(-forceX, -forceY);
+            rb.linearVelocity = new Vector2(-forceX, -forceY);
         }
         if (transform.rotation.eulerAngles.z == 135)
         {
-            rb.velocity = new Vector2(-forceX, forceY);
+            rb.linearVelocity = new Vector2(-forceX, forceY);
         }
         if (transform.rotation.eulerAngles.z == 315)
         {
-            rb.velocity = new Vector2(forceX, -forceY);
+            rb.linearVelocity = new Vector2(forceX, -forceY);
         }
     }
 

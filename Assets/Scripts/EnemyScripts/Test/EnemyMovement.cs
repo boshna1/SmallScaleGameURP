@@ -33,11 +33,11 @@ public class EnemyMovement : MonoBehaviour
         Vector2 point = CurrentPoint.position - transform.position;
         if (CurrentPoint == pointR.transform)
         {
-            rb.velocity = new Vector2(speed, 0);
+            rb.linearVelocity = new Vector2(speed, 0);
         }
         if (CurrentPoint == pointL.transform)
         {
-            rb.velocity = new Vector2(-speed, 0);
+            rb.linearVelocity = new Vector2(-speed, 0);
         }
         if (Vector2.Distance(transform.position, CurrentPoint.position) < Distancefrompoint && CurrentPoint == pointR.transform)
         {
