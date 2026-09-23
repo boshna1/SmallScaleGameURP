@@ -33,7 +33,7 @@ public  class AudioManager : MonoBehaviour {
 
     public  void PlaySoundAmbient(string clipName, float vol)
     {
-        Debug.Log(sfxList.Find(sfx => sfx.name == clipName));
+
         AudioClip tempClip = sfxList.Find(sfx => sfx.name == clipName);
         audioSource.PlayOneShot(tempClip, vol);
     }
@@ -41,7 +41,7 @@ public  class AudioManager : MonoBehaviour {
     public void PlaySoundAmbientPitch(string clipName, float pitch, float vol)
     {
         audioSource.pitch = pitch;
-        Debug.Log(sfxList.Find(sfx => sfx.name == clipName));
+
         AudioClip tempClip = sfxList.Find(sfx => sfx.name == clipName);
         audioSource.PlayOneShot(tempClip, vol);
         StartCoroutine(WaitClipLength(tempClip.length));

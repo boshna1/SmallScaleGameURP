@@ -76,6 +76,8 @@ public class PlayerMovement : MonoBehaviour
 
     [SerializeField] float landSoundThreshold = 3;
 
+    public float baseLungeDist;
+
     public enum DirX
     {
         Left,
@@ -95,6 +97,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Start()
     {
+        pi = GetComponent<PlayerInput>();
         isKnockback = false;    
         if (name == "PlayerSword")
         {
@@ -172,13 +175,13 @@ public class PlayerMovement : MonoBehaviour
         move.action.Disable();
         jump.action.Disable();
         dash.action.Disable();
-
         jump.action.started -= Jump;
         dash.action.started -= Dash;
         InputSystem.onDeviceChange -= OnDeviceChange;
         pi.onControlsChanged -= OnControlsChanged;
     }
     
+
     public void OnControlsChanged(PlayerInput currentInput)
     {
         if (currentInput.currentControlScheme == "Gamepad")
@@ -210,7 +213,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void Jump(InputAction.CallbackContext obj)
     {
-        if (isGrounded || enableDoubleJump && jumpCount < maxJump && obj.performed)
+        if (isGrounded || movementState == MovementState.WallDraging || enableDoubleJump && jumpCount < maxJump && obj.performed)
         {           
             jumpCount++;
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
@@ -244,7 +247,7 @@ public class PlayerMovement : MonoBehaviour
 
     public void Lunge(float modifier)
     {
-        dashVelocityX = _moveDirection.x * modifier;
+        dashVelocityX = (_moveDirection.x + baseLungeDist) * modifier ;
         dashTime = 0;
         isDashing = true;
         isLunging = true;
@@ -263,7 +266,7 @@ public class PlayerMovement : MonoBehaviour
                 normal = contact.normal;
             }
             
-            if (normal.x != 0)
+            if (normal.x != 0 && rb.linearVelocityY < 0)
             {
                 movementState = MovementState.WallDraging;
                 if (rb.linearVelocityY < landSoundThreshold)
@@ -271,12 +274,7 @@ public class PlayerMovement : MonoBehaviour
                     AudioManager.Instance.PlaySoundAmbientPitch("GroundLand", 2.5f, 0.3f);   
                 }
             }
-            else
-            {
-                movementState = MovementState.Grounded;
-
-            }
-            if (normal.y != -1)
+            else if (normal.y != -1)
             {
                 AudioManager.Instance.PlaySoundAmbientPitch("GroundLand", AudioManager.Instance.defaultPitch, 0.3f);
                 movementState = MovementState.Grounded;
@@ -289,9 +287,15 @@ public class PlayerMovement : MonoBehaviour
     {
         if (collision.transform.tag == "Ground")
         {
-            isGrounded = false;
-            movementState = MovementState.Airborne;
-            AudioManager.Instance.PlaySoundAmbientPitch("GroundLand", 2.5f, 0.3f);
+            
+            if (rb.linearVelocityY != 0)
+            {
+                movementState = MovementState.Airborne;
+                isGrounded = false;
+                AudioManager.Instance.PlaySoundAmbientPitch("GroundLand", 2.5f, 0.3f);
+            }
+            
+            
 
         }
     }
@@ -398,10 +402,14 @@ public class PlayerMovement : MonoBehaviour
             if (_moveDirection.x < 0)
             {
                 dirX = DirX.Left;
+                baseLungeDist = -baseLungeDist;
+                spearAttack.xDirMod = -1;
             }
             else if (_moveDirection.x > 0)
             {
                 dirX = DirX.Right;
+                baseLungeDist = 0.6f;
+                spearAttack.xDirMod = 1;
             }
             else
             {
@@ -413,15 +421,18 @@ public class PlayerMovement : MonoBehaviour
             if (_moveDirection.y < 0)
             {
                 dirY = DirY.Down;
+                spearAttack.yDirMod = -1;
             }
             else if (_moveDirection.y > 0)
             {
                 dirY = DirY.Up;
+                spearAttack.yDirMod = 1;
             }
-            else
-            {
-                dirY = DirY.None;
-            }
+            
+        }
+        else
+        {
+            dirY = DirY.None;
         }
     }
 

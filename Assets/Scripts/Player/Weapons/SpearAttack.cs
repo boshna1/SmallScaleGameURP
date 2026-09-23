@@ -15,8 +15,12 @@ public class SpearAttack : MonoBehaviour
     //basic
     public float[] basicAnimationTime = new float[3];
     public float[] basicAttackLungeDist = new float[3];
+
+    public float[] basicUpAnimationTime = new float[1];
     public bool enableBasicAttack;
     [SerializeField] GameObject[] hitBoxBasic = new GameObject[3];
+
+    [SerializeField] GameObject[] hitBoxUpBasic = new GameObject[1];
     public float basicDestroyTime;
     public bool isSpearSpam;
     public float spamTime;
@@ -52,8 +56,13 @@ public class SpearAttack : MonoBehaviour
     [Header("Input Assignment")]
     public InputActionReference attack;
 
+    public int xDirMod = -1;
+    public int yDirMod = -1;
+
     void Start()
     {
+        xDirMod = -1;
+        yDirMod = -1;
         pi = GetComponent<PlayerInput>();
         //attatches other components
         pm = GetComponent<PlayerMovement>();
@@ -153,36 +162,37 @@ public class SpearAttack : MonoBehaviour
     public void BasicAttack()
     {
         Debug.Log("pass2");
-        //calls function in player movment to lunge
         pm.CalculateDirections();
+        //calls function in player movment to lunge
         pm.Lunge(basicAttackLungeDist[animationCount]);
         int random = Random.Range(-25, 25);
         if (!isSpearSpam)
         {
-            Debug.Log("pass3");
-            GameObject temp = Instantiate(hitBoxBasic[animationCount], new Vector2(this.transform.position.x, this.transform.position.y), Quaternion.identity, transform);
-            if (pm.dirX == PlayerMovement.DirX.Left) //changes direction of hitbox depending on where the player is facing by mirroring it using scale
+            if (pm.dirX != PlayerMovement.DirX.None && pm.dirY == PlayerMovement.DirY.None)
             {
-                temp.transform.localScale *= new Vector2(1, 1);
+                Debug.Log("pass3");
+                GameObject temp = Instantiate(hitBoxBasic[animationCount], new Vector2(this.transform.position.x, this.transform.position.y), Quaternion.identity, transform);
+                temp.transform.localScale *= new Vector2(xDirMod, yDirMod);
+                Destroy(temp, 1f);
+                StartCoroutine(WaitAnimation(basicAnimationTime[animationCount], true));
             }
-            if (pm.dirX == PlayerMovement.DirX.Left)
+            else if (pm.dirY == PlayerMovement.DirY.Up)
             {
-                temp.transform.localScale *= new Vector2(1, -1);
+                animationCount = 0;
+                GameObject temp = Instantiate(hitBoxUpBasic[animationCount], new Vector2(this.transform.position.x, this.transform.position.y), Quaternion.identity, transform);
+                temp.transform.localScale *= new Vector2(xDirMod, 1);
+                AnimationClip clipInfo = temp.GetComponent<Animator>().runtimeAnimatorController.animationClips[0];
+                StartCoroutine(WaitAnimation(clipInfo.length, true));
+                Destroy(temp, clipInfo.length + 0.5f);
+                animationCount = 0;
+                isSpearSpam = false;
             }
-            Destroy(temp, 1f);
-            StartCoroutine(WaitAnimation(basicAnimationTime[animationCount], true));
+            
         }
-        if (isSpearSpam)
+        else if (isSpearSpam && animationCount == 2)
         {
             GameObject temp = Instantiate(hitBoxBasic[animationCount], new Vector2(transform.position.x, transform.position.y), Quaternion.Euler(0, 0, random), transform);
-            if (pm.dirX == PlayerMovement.DirX.Left) //changes direction of hitbox depending on where the player is facing by mirroring it using scale
-            {
-                temp.transform.localScale *= new Vector2(1, 1);
-            }
-            if (pm.dirX == PlayerMovement.DirX.Right)
-            {
-                temp.transform.localScale *= new Vector2(1, -1);
-            }
+            temp.transform.localScale *= new Vector2(xDirMod, yDirMod);
             spamTime = Time.time;
             StartCoroutine(CheckSpamTime());
             Destroy(temp, 1f);
@@ -195,7 +205,6 @@ public class SpearAttack : MonoBehaviour
     public void AerialAttack()
     {
         pm.dirY = PlayerMovement.DirY.None;
-        pm.CalculateDirections();
         //in air facing left or left + no vertical, listens for key presses
         if (pm._moveDirection.x != 0 && Mathf.Abs(pm._moveDirection.y) < 0.4f)
         {
@@ -272,14 +281,14 @@ public class SpearAttack : MonoBehaviour
                 pm.Hop(hopModifierY);
             }
             //Down
-            else if(pm.dirY == PlayerMovement.DirY.Up && Mathf.Abs(pm._moveDirection.x) < 0.2f)
+            else if(pm.dirY == PlayerMovement.DirY.Down && Mathf.Abs(pm._moveDirection.x) < 0.2f)
             {
                 Debug.Log("Down");
                 temp.transform.rotation = Quaternion.Euler(0, 0, -90);
                 pm.Hop(hopModifierY);
             }
             //Up
-            else if(pm.dirY == PlayerMovement.DirY.Down && Mathf.Abs(pm._moveDirection.x) < 0.2f)
+            else if(pm.dirY == PlayerMovement.DirY.Up && Mathf.Abs(pm._moveDirection.x) < 0.2f)
             {
                 Debug.Log("Up");
                 temp.transform.rotation = Quaternion.Euler(0, 0, 90);
@@ -299,11 +308,5 @@ public class SpearAttack : MonoBehaviour
     public void EnableDashAttack(bool condition)
     {
         enableDashAttack = condition;
-    }
-
-    void ResetDir()
-    {
-        pm.dirX = PlayerMovement.DirX.None;
-        pm.dirY = PlayerMovement.DirY.None;
     }
 }
